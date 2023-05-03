@@ -13,7 +13,7 @@ digits = load_digits()
 X_train, X_test, y_train, y_test = train_test_split(digits.data, digits.target, test_size=0.2, random_state=42)
 
 # Define the neural network classifier
-clf = MLPClassifier(hidden_layer_sizes=(50,50), max_iter=500, alpha=0.0001, solver='adam', verbose=10,  random_state=21,tol=0.000000001)
+clf = MLPClassifier(hidden_layer_sizes=(100,75), max_iter=1000, alpha=0.000008, solver='adam', verbose=10,  random_state=22, tol=0.000000001)
 
 # Train the classifier on the training set
 training_accuracy = []
@@ -21,7 +21,7 @@ training_loss = []
 testing_accuracy = []
 testing_loss = []
 
-for i in range(500):
+for i in range(1000):
     clf.partial_fit(X_train, y_train, classes=np.unique(y_train))
     training_accuracy.append(clf.score(X_train, y_train))
     training_loss.append(log_loss(y_train, clf.predict_proba(X_train)))
