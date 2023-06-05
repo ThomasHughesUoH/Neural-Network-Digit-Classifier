@@ -102,7 +102,7 @@ class DigitClassifier:
         return predictions
 
     def learn_to_draw(self, X_correct, y_correct):
-        self.clf = MLPClassifier(hidden_layer_sizes=(300, 200), max_iter=2000, alpha=1e-5, solver='adam',
+        self.clf = MLPClassifier(hidden_layer_sizes=(300, 200), max_iter=2000, alpha=1e-7, solver='adam',
                                  verbose=10, random_state=42, tol=1e-9)
         self.clf.fit(X_correct, y_correct)
 
