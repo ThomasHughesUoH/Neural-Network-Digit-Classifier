@@ -71,7 +71,7 @@ class DigitClassifier:
             ax.legend()
         plt.savefig('loss_and_accuracy.svg', dpi=300)
         plt.show()
-        
+
     def plot_sample_images(self, X_test, y_pred, y_test):
         fig, axs = plt.subplots(nrows=4, ncols=4, figsize=(8, 8))
         for ax, idx in zip(axs.ravel(), range(16)):
@@ -86,9 +86,12 @@ class DigitClassifier:
     def save_predictions_to_csv(self, filename, y_test):
         with open(filename, "w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["Predicted", "Actual"])
+            writer.writerow(["Predicted", "Actual", "Match"])
             for i in range(len(self.y_pred)):
-                writer.writerow([self.y_pred[i], y_test[i]])
+                predicted = self.y_pred[i]
+                actual = y_test[i]
+                match = int(predicted == actual)
+                writer.writerow([predicted, actual, match])
             print("Data written to predictions.csv\n")
 
     def load_predictions_from_csv(self, filename):
@@ -97,7 +100,7 @@ class DigitClassifier:
             next(reader)  # Skip the header row
             predictions = []
             for row in reader:
-                predicted, actual = map(int, row)
+                predicted, actual, _ = map(int, row)
                 predictions.append((predicted, actual))
         return predictions
 
