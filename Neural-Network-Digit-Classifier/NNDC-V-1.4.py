@@ -8,6 +8,9 @@ from sklearn.metrics import accuracy_score, log_loss
 
 class DigitClassifier:
     def __init__(self):
+        """
+        Initialize the DigitClassifier object.
+        """
         self.clf = None
         self.training_accuracy = []
         self.training_loss = []
@@ -19,15 +22,33 @@ class DigitClassifier:
         self.error_counts = {}
 
     def load_digits_dataset(self):
+        """
+        Load the digits dataset and split it into training and testing sets.
+
+        Returns:
+            X_train (numpy.ndarray): Training data features.
+            X_test (numpy.ndarray): Testing data features.
+            y_train (numpy.ndarray): Training data labels.
+            y_test (numpy.ndarray): Testing data labels.
+        """
         digits = load_digits()
         np.savetxt("digits_data.txt", digits.data)
         X_train, X_test, y_train, y_test = train_test_split(digits.data, digits.target, test_size=0.2, random_state=42)
         return X_train, X_test, y_train, y_test
 
     def train_classifier(self, X_train, X_test, y_train, y_test):
+        """
+        Train the neural network classifier.
+
+        Args:
+            X_train (numpy.ndarray): Training data features.
+            X_test (numpy.ndarray): Testing data features.
+            y_train (numpy.ndarray): Training data labels.
+            y_test (numpy.ndarray): Testing data labels.
+        """
         self.clf = MLPClassifier(hidden_layer_sizes=(100, 100), max_iter=2000, alpha=8e-6, solver='adam',
-                                 verbose=10, random_state=22, tol=1e-9)
-        for i in range(1000):
+                                 verbose=30, random_state=22, tol=1e-9)
+        for i in range(2000):
             self.clf.partial_fit(X_train, y_train, classes=np.unique(y_train))
             self.training_accuracy.append(self.clf.score(X_train, y_train))
             self.training_loss.append(log_loss(y_train, self.clf.predict_proba(X_train)))
@@ -35,10 +56,26 @@ class DigitClassifier:
             self.testing_loss.append(log_loss(y_test, self.clf.predict_proba(X_test)))
 
     def predict(self, X_test, y_test):
+        """
+        Perform predictions on the testing data.
+
+        Args:
+            X_test (numpy.ndarray): Testing data features.
+            y_test (numpy.ndarray): Testing data labels.
+        """
         self.y_pred = self.clf.predict(X_test)
         self.accuracy = accuracy_score(y_test, self.y_pred)
 
     def collect_incorrect_predictions(self, predictions):
+        """
+        Collect the incorrect predictions from the given list of predictions.
+
+        Args:
+            predictions (list): List of predicted and actual labels.
+
+        Returns:
+            None
+        """
         self.incorrect_predictions = []
         for prediction in predictions:
             predicted, actual = map(int, prediction)
@@ -46,6 +83,12 @@ class DigitClassifier:
                 self.incorrect_predictions.append((predicted, actual))
 
     def count_error_occurrences(self):
+        """
+        Count the occurrences of each error label in the incorrect predictions.
+
+        Returns:
+            None
+        """
         self.error_counts = {}
         for prediction in self.incorrect_predictions:
             actual = prediction[1]
@@ -55,6 +98,12 @@ class DigitClassifier:
                 self.error_counts[actual] = 1
 
     def plot_loss_and_accuracy(self):
+        """
+        Plot the training and testing loss and accuracy over epochs.
+
+        Returns:
+            None
+        """
         fig, axs = plt.subplots(ncols=2, figsize=(12, 6))
         for ax, metric, name in zip(axs, [self.training_accuracy, self.testing_accuracy],
                                     ['Training Accuracy', 'Testing Accuracy']):
@@ -73,6 +122,17 @@ class DigitClassifier:
         plt.show()
 
     def plot_sample_images(self, X_test, y_pred, y_test):
+        """
+        Plot a grid of sample images along with their predicted and actual labels.
+
+        Args:
+            X_test (numpy.ndarray): Testing data features.
+            y_pred (numpy.ndarray): Predicted labels.
+            y_test (numpy.ndarray): Actual labels.
+
+        Returns:
+            None
+        """
         fig, axs = plt.subplots(nrows=4, ncols=4, figsize=(8, 8))
         for ax, idx in zip(axs.ravel(), range(16)):
             ax.imshow(X_test[idx].reshape((8, 8)), cmap=plt.cm.gray_r)
@@ -84,6 +144,16 @@ class DigitClassifier:
         plt.show()
 
     def save_predictions_to_csv(self, filename, y_test):
+        """
+        Save the predicted and actual labels to a CSV file.
+
+        Args:
+            filename (str): Name of the CSV file.
+            y_test (numpy.ndarray): Actual labels.
+
+        Returns:
+            None
+        """
         with open(filename, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(["Predicted", "Actual", "Match"])
@@ -95,6 +165,15 @@ class DigitClassifier:
             print("Data written to predictions.csv\n")
 
     def load_predictions_from_csv(self, filename):
+        """
+        Load the predicted and actual labels from a CSV file.
+
+        Args:
+            filename (str): Name of the CSV file.
+
+        Returns:
+            predictions (list): List of predicted and actual labels.
+        """
         with open(filename, "r", newline="") as f:
             reader = csv.reader(f)
             next(reader)  # Skip the header row
@@ -105,11 +184,30 @@ class DigitClassifier:
         return predictions
 
     def learn_to_draw(self, X_correct, y_correct):
-        self.clf = MLPClassifier(hidden_layer_sizes=(300, 200), max_iter=2000, alpha=1e-7, solver='adam',
+        """
+        Train the neural network classifier to learn to draw digits.
+
+        Args:
+            X_correct (numpy.ndarray): Correctly identified digit features.
+            y_correct (numpy.ndarray): Correctly identified digit labels.
+
+        Returns:
+            None
+        """
+        self.clf = MLPClassifier(hidden_layer_sizes=(400, 300), max_iter=2750, alpha=1e-7, solver='adam',
                                  verbose=10, random_state=42, tol=1e-9)
         self.clf.fit(X_correct, y_correct)
 
     def draw_digit(self, X_digit):
+        """
+        Draw a digit based on the given digit features.
+
+        Args:
+            X_digit (numpy.ndarray): Digit features.
+
+        Returns:
+            None
+        """
         digit = self.clf.predict([X_digit])[0]
         plt.imshow(X_digit.reshape((8, 8)), cmap=plt.cm.gray_r, interpolation='nearest')
         plt.title(f"Digit: {digit}")
@@ -118,6 +216,12 @@ class DigitClassifier:
         plt.show()
 
     def run(self):
+        """
+        Run the digit classifier pipeline.
+
+        Returns:
+            None
+        """
         X_train, X_test, y_train, y_test = self.load_digits_dataset()
         self.train_classifier(X_train, X_test, y_train, y_test)
         self.predict(X_test, y_test)
